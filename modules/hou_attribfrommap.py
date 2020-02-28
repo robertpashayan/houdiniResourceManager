@@ -1,5 +1,5 @@
 import os
-from hou_libs.utils import node_manager
+from houdiniResourceManager.modules import node_manager
 
 params = ['reload','fileName','frame','fps','missingfile']
 

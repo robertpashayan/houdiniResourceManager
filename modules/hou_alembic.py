@@ -1,4 +1,4 @@
-from hou_libs.utils import alembic
+from houdiniResourceManager.modules import alembic
 import os
 
 
@@ -22,3 +22,6 @@ def replace_path(nodes, from_, to_):
         if from_ in current_name :
             new_name = current_name.replace(from_,to_)
             alembic.set_file_name(node, new_name)
+
+def get_file_path(abc_node):
+    return (os.path.normpath(abc_node.parm("fileName").eval()))

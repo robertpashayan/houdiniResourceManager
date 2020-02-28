@@ -1,7 +1,7 @@
 import os
 import hou
 from PySide2 import QtCore,QtGui, QtWidgets
-from hou_libs.resourceManager import resourceManagerCore as rmCore
+from houdiniResourceManager import resourceManagerCore as rmCore
 
 class resourceManagerUI(QtWidgets.QDialog):
 	def __init__(self, parent=None, pos_x=100, pos_y=100):
@@ -104,11 +104,10 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.qtableColumns = ['path','filePath']
 		self.qtable.setColumnCount(len(self.qtableColumns))
 		self.qtable.setHorizontalHeaderLabels(self.qtableColumns)
+		self.qtable.setSelectionBehavior(QtWidgets.QTableView.SelectRows);
 		self.header = self.qtable.horizontalHeader()       
 		self.header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-		self.header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
-		self.header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
-		
+		self.header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
 		self.renaming_tools = QtWidgets.QWidget()
 		self.renaming_tools.setFixedHeight(150)
@@ -118,11 +117,13 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.content_layout.addWidget(self.renaming_tools)
 
 	def refresh_qtable(self):
-
 		self.qtable.setRowCount(len(self.elements))
 		for row in range(len(self.elements)):
-			col_elements = [(self.elements[row].path()),(self.elements[row].name())]
+			
+			col_elements = [(self.elements[row].path())]
 			for column in range(len(self.qtableColumns)):
+				file_path = rmCore.get_file_path(self.elements[row])
+				col_elements.append(file_path)
 				item = QtWidgets.QLabel(col_elements[column])
 				self.qtable.setCellWidget(row,column, item)
 
@@ -131,6 +132,5 @@ class resourceManagerUI(QtWidgets.QDialog):
 
 
 	def scan_scene(self):
-		print "scan_scene"
 		self.elements = rmCore.collect()
 		self.refresh_qtable()
