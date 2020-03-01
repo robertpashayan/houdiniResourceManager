@@ -1,0 +1,109 @@
+/* QWidget
+{
+    background: rgb(19, 18, 23);
+    selection-background-color:rgba(255,255,255);
+} */
+
+QTableView::item
+{
+    border-right: 0;
+    border-left: 0;
+    border-top: 0;
+    border-bottom: 0;
+}
+
+QDialog
+{
+    background: rgb(19, 18, 23);
+    color: rgb(204, 204, 204);
+    padding: 10px;
+}
+
+QTableView
+{
+    alternate-background-color: rgb(255, 58, 58);
+    background: rgba(46, 46, 46,50);
+    selection-background-color: rgba(185, 134, 32, 77);
+    selection-color: rgb(0, 0, 0);
+    color: rgb(204, 204, 204);
+}
+
+QTableView::item:selected
+{
+    alternate-background-color: rgb(19, 18, 23);
+    border-top: 1px solid rgb(30, 144, 245);
+    border-bottom: 1px solid rgb(30, 144, 245);
+    color: rgb(204, 204, 204);
+    background: rgba(22, 106, 189, 77);
+}
+
+QPushButton
+{
+    font: bold;
+    font-size: 16px;
+    background-color: rgb(19, 18, 23);
+    border-style: outset;
+    border-color: rgb(37, 36, 41);
+    border-width: 2px;
+    border-radius: 10px;
+}
+QPushButton:hover
+{
+    background-color: rgb(29, 28, 35);
+}
+QPushButton:pressed
+{
+    background-color: rgb(46, 44, 53);
+}
+QScrollBar:vertical
+{
+    border: 2px solid grey;
+    background: #474747;
+    width: 15px;
+    margin: 22px 0 22px 0;
+}
+QScrollBar::handle:vertical 
+{
+    background: #a0a0a0;
+    min-height: 20px;
+}
+QScrollBar::add-line:vertical 
+{
+    border: 2px solid grey;
+    background: #474747;
+    height: 20px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical 
+{
+    border: 2px solid grey;
+    background: #474747;
+    height: 20px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical 
+{
+    border: 2px solid grey;
+    width: 3px;
+    height: 3px;
+    background: #a0a0a0;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical 
+{
+background: none;
+}
+
+QProgressBar 
+{
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(29, 28, 35), stop: 1 rgb(24, 23, 40));
+    border-radius: 10px;
+}
+QProgressBar::chunk
+{
+
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #1876e0, stop: 1 #1e90ff);
+    border-radius: 9px;
+}
