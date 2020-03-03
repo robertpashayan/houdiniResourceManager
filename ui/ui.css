@@ -1,6 +1,6 @@
 /* QWidget
 {
-    background: rgb(19, 18, 23);
+    background: rgb(29, 28, 31);
     selection-background-color:rgba(255,255,255);
 } */
 
@@ -14,23 +14,59 @@ QTableView::item
 
 QDialog
 {
-    background: rgb(19, 18, 23);
+    background: rgb(29, 28, 31);
     color: rgb(204, 204, 204);
     padding: 10px;
+}
+
+QCheckBox
+{
+    background: rgb(29, 28, 31);
+}
+
+QSpinBox
+{
+    background-color: rgb(29, 28, 31);
+    border-style: outset;
+    border-color: rgb(47, 46, 49);
+    border-width: 2px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+
+QLineEdit
+{
+    background-color: rgb(29, 28, 31);
+    border-style: outset;
+    border-color: rgb(47, 46, 49);
+    border-width: 2px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+QComboBox
+{
+    background-color: rgb(29, 28, 31);
+    border-style: outset;
+    border-color: rgb(47, 46, 49);
+    border-width: 2px;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 QTableView
 {
     alternate-background-color: rgb(255, 58, 58);
-    background: rgba(46, 46, 46,50);
+    background: rgba(56, 56, 56,50);
     selection-background-color: rgba(185, 134, 32, 77);
-    selection-color: rgb(0, 0, 0);
+    selection-color: rgb(47, 46, 49);
     color: rgb(204, 204, 204);
 }
 
 QTableView::item:selected
 {
-    alternate-background-color: rgb(19, 18, 23);
+    alternate-background-color: rgb(29, 28, 31);
     border-top: 1px solid rgb(30, 144, 245);
     border-bottom: 1px solid rgb(30, 144, 245);
     color: rgb(204, 204, 204);
@@ -41,9 +77,9 @@ QPushButton
 {
     font: bold;
     font-size: 16px;
-    background-color: rgb(19, 18, 23);
+    background-color: rgb(29, 28, 31);
     border-style: outset;
-    border-color: rgb(37, 36, 41);
+    border-color: rgb(47, 46, 49);
     border-width: 2px;
     border-radius: 10px;
 }
