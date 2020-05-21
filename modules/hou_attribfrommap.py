@@ -32,3 +32,16 @@ def replace_path(nodes, from_, to_):
         if from_ in current_name :
             new_name = current_name.replace(from_,to_)
             node.parm('filename').set(new_name)
+
+
+def get_file_path(abc_node):
+    return (os.path.normpath(abc_node.parm("fileName").eval()))
+
+def set_file_path(abc_node, new_path):
+    return (os.path.normpath(abc_node.parm("fileName").set(new_path)))
+
+    
+def get_files(abc_node):
+    file_path = os.path.normpath(abc_node.parm("fileName").eval())
+    file_path.replace("$F","*")
+    return (glob.glob(file_path))

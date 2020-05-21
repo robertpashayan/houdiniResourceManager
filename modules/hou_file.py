@@ -32,3 +32,9 @@ def replace_path(nodes, from_, to_):
         if from_ in current_name :
             new_name = current_name.replace(from_,to_)
             node.parm('file').set(new_name)
+
+def get_file_path(node):
+    return (os.path.normpath(node.parm("file").eval()))
+
+def set_file_path(abc_node, new_path):
+    return (os.path.normpath(abc_node.parm("file").set(new_path)))

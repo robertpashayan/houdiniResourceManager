@@ -1,7 +1,14 @@
+import glob
 import os
 from houdiniResourceManager.modules import aImage
 
+sequance_tags = ["<udim>"]
 
+'''
+TODO
+
+Add an option for additional info which will indicate existing TX files
+'''
 params = ['reload','fileName','frame','fps','missingfile']
 
 
@@ -21,8 +28,16 @@ def replace_path(nodes, from_, to_):
         current_name = os.path.normpath(aImage.get_file_path(node))
         if from_ in current_name :
             new_name = current_name.replace(from_,to_)
-            print new_name
             aImage.set_file_path(node, new_name)
 
 def get_file_path(node):
-    return (os.path.normpath(node.parm("fileName").eval()))
+    return (os.path.normpath(node.parm("filename").eval()))
+
+def set_file_path(abc_node, new_path):
+    return (os.path.normpath(abc_node.parm("filename").set(new_path)))
+
+def get_files(abc_node):
+    file_path = os.path.normpath(abc_node.parm("filename").eval())
+    for sequance_tag in sequance_tags :
+        file_path = file_path.replace(sequance_tag, "*")
+    return (glob.glob(file_path))
