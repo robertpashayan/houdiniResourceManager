@@ -56,21 +56,20 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.layout.addWidget(self.replaceUI)
 
         self.addUI = QtWidgets.QGroupBox("Add to File's name")
-        self.addUI.setCheckable(True)
         self.addUI.setMinimumWidth(350)
         self.addUI_layout = QtWidgets.QVBoxLayout()
         self.addUI_layout.setContentsMargins(25, 0, 0, 0)
         self.addUI.setLayout(self.addUI_layout)
 
         self.addUI_head = QtWidgets.QWidget()
-        # self.addUI_head_checkbox = QtWidgets.QCheckBox()
-        # self.addUI_head_label = QtWidgets.QLabel("Activate")
-        # self.addUI_head_label.setFont(self.parent.h2)
+        self.addUI_head_checkbox = QtWidgets.QCheckBox()
+        self.addUI_head_label = QtWidgets.QLabel("Activate")
+        self.addUI_head_label.setFont(self.parent.h2)
         self.addUI_head_Layout = QtWidgets.QHBoxLayout()
         self.addUI_head_Layout.setContentsMargins(0, 0, 0, 0)
         self.addUI_head_Layout.setAlignment(QtCore.Qt.AlignLeft)
-        # self.addUI_head_Layout.addWidget(self.addUI_head_checkbox)
-        # self.addUI_head_Layout.addWidget(self.addUI_head_label)
+        self.addUI_head_Layout.addWidget(self.addUI_head_checkbox)
+        self.addUI_head_Layout.addWidget(self.addUI_head_label)
         self.addUI_head.setLayout(self.addUI_head_Layout)
 
         self.addUI_prefix = QtWidgets.QWidget()
@@ -156,7 +155,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         
         self.replaceUI_head_checkbox.clicked.connect(self.update_replace_dependants)
 
-        self.addUI.clicked.connect(self.update_addUI_dependants)
+        self.addUI_head_checkbox.clicked.connect(self.update_addUI_dependants)
         self.addUI_prefix_checkbox.clicked.connect(self.update_addUI_prefix_dependants)
         self.addUI_suffix_checkbox.clicked.connect(self.update_addUI_suffix_dependants)
         self.addUI_enum_checkbox.clicked.connect(self.update_addUI_enum_dependants)
@@ -201,7 +200,7 @@ class renamingTools_UI(QtWidgets.QWidget):
             replace_from = self.replaceUI_from_edit.text()
             replace_to = self.replaceUI_to_edit.text()
             file_path = file_path.replace(replace_from,replace_to)
-        add_state = self.addUI.isChecked()
+        add_state = self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         if add_state:
             file_dir,file_name = os.path.split(file_path)
             prefix = ""
@@ -233,7 +232,7 @@ class renamingTools_UI(QtWidgets.QWidget):
 
 
     def update_addUI_dependants(self):
-        state = self.addUI.isChecked()
+        state = self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
 
         self.addUI_prefix_checkbox.setEnabled(state)
         self.update_addUI_prefix_dependants()
@@ -256,7 +255,7 @@ class renamingTools_UI(QtWidgets.QWidget):
 
     def update_addUI_enum_dependants(self):
         state = self.addUI_enum_checkbox.checkState() == QtCore.Qt.CheckState.Checked and \
-            self.addUI.isChecked()
+            self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.addUI_enum_start_spinbox.setEnabled(state)
         self.addUI_enum_by_spinbox.setEnabled(state)
         self.addUI_enum_digits_spinbox.setEnabled(state)
