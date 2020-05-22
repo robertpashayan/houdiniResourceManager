@@ -76,7 +76,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.addUI_head_Layout.addWidget(self.addUI_head_label)
 
         self.addUI_prefix_Layout = QtWidgets.QHBoxLayout()
-        self.addUI_prefix_Layout.setContentsMargins(20, 0, 0, 0)
+        self.addUI_prefix_Layout.setContentsMargins(4, 0, 0, 0)
         self.addUI_prefix_checkbox = QtWidgets.QCheckBox()
         self.addUI_prefix_label = QtWidgets.QLabel("Prefix")
         self.addUI_prefix_editbox = QtWidgets.QLineEdit()
@@ -86,7 +86,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.addUI_prefix_Layout.addWidget(self.addUI_HLayourEndSpacer)
 
         self.addUI_suffix_Layout = QtWidgets.QHBoxLayout()
-        self.addUI_suffix_Layout.setContentsMargins(20, 0, 0, 0)
+        self.addUI_suffix_Layout.setContentsMargins(4, 0, 0, 0)
         self.addUI_suffix_checkbox = QtWidgets.QCheckBox()
         self.addUI_suffix_label = QtWidgets.QLabel("Suffix")
         self.addUI_suffix_editbox = QtWidgets.QLineEdit()
@@ -96,7 +96,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.addUI_suffix_Layout.addWidget(self.addUI_HLayourEndSpacer)
 
         self.addUI_enum_Layout = QtWidgets.QHBoxLayout()
-        self.addUI_enum_Layout.setContentsMargins(20, 0, 0, 0)
+        self.addUI_enum_Layout.setContentsMargins(4, 0, 0, 0)
         self.addUI_enum_checkbox = QtWidgets.QCheckBox()
         self.addUI_enum_label = QtWidgets.QLabel("Enumerate")
         self.addUI_enum_start_label = QtWidgets.QLabel(" start")
@@ -122,11 +122,14 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.addUI_enum_Layout.addWidget(self.addUI_enum_digits_label)
         self.addUI_enum_Layout.addWidget(self.addUI_enum_digits_spinbox)
         self.addUI_enum_Layout.addWidget(self.addUI_HLayourEndSpacer)
-
-        self.addUI_layout.addLayout(self.addUI_head_Layout)
+        
+        self.addUI_layout.addStretch()
         self.addUI_layout.addLayout(self.addUI_prefix_Layout)
+        self.addUI_layout.addStretch()
         self.addUI_layout.addLayout(self.addUI_suffix_Layout)
+        self.addUI_layout.addStretch()
         self.addUI_layout.addLayout(self.addUI_enum_Layout)
+        self.addUI_layout.addStretch()
         self.layout.addWidget(self.addUI)
 
         self.ctrlsUI = QtWidgets.QWidget()
@@ -152,10 +155,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.ctrlsUI_btn_apply = QtWidgets.QPushButton("Commit Changes")
         self.ctrlsUI_btn_apply.setFixedHeight(60)
 
-        
         self.replaceUI_head_checkbox.clicked.connect(self.update_replace_dependants)
-
-        self.addUI_head_checkbox.clicked.connect(self.update_addUI_dependants)
         self.addUI_prefix_checkbox.clicked.connect(self.update_addUI_prefix_dependants)
         self.addUI_suffix_checkbox.clicked.connect(self.update_addUI_suffix_dependants)
         self.addUI_enum_checkbox.clicked.connect(self.update_addUI_enum_dependants)
@@ -164,8 +164,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.ctrlsUI_oprtions_layout.addWidget(self.ctrlsUI_btn_apply)
 
         self.ctrlsUI_layout.addWidget(self.ctrlsUI_oprtions)
-   
-        # self.replaceUI_head_Layout = QtWidgets.QVBoxLayout()
+
         self.addUI_enum_Layout.setContentsMargins(20, 0, 0, 0)
 
         self.layout.addWidget(self.ctrlsUI)
@@ -200,62 +199,53 @@ class renamingTools_UI(QtWidgets.QWidget):
             replace_from = self.replaceUI_from_edit.text()
             replace_to = self.replaceUI_to_edit.text()
             file_path = file_path.replace(replace_from,replace_to)
-        add_state = self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-        if add_state:
-            file_dir,file_name = os.path.split(file_path)
-            prefix = ""
-            suffix = ""
-            enum = ""
-            part_separator = "_"
-            prefix_state =self.addUI_prefix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-            suffix_state =self.addUI_suffix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-            enum_state =self.addUI_enum_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-            if prefix_state:
-                prefix = self.addUI_prefix_editbox.text() + part_separator
-            if suffix_state:
-                suffix = part_separator + self.addUI_suffix_editbox.text()
-            if enum_state:
-                enum_from = self.addUI_enum_start_spinbox.value()
-                enum_by = self.addUI_enum_by_spinbox.value()
-                digits = self.addUI_enum_digits_spinbox.value()
-                current_num  = enum_from + (enum_by * id)
-                enum = part_separator + get_enum_str(current_num, digits)
-            splitter = "."
-            
-            split_name = file_name.split(splitter)
-            new_name = prefix + split_name[0] + suffix + enum
-            for i in range(len(split_name)-2):
-                new_name+= split_name[i+1]
-            new_name+= "." + split_name.pop()
-            file_path = os.path.join(file_dir,new_name)
+        file_dir,file_name = os.path.split(file_path)
+        prefix = ""
+        suffix = ""
+        enum = ""
+        part_separator = "_"
+        prefix_state =self.addUI_prefix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        suffix_state =self.addUI_suffix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        enum_state =self.addUI_enum_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        if prefix_state:
+            prefix = self.addUI_prefix_editbox.text() + part_separator
+        if suffix_state:
+            suffix = part_separator + self.addUI_suffix_editbox.text()
+        if enum_state:
+            enum_from = self.addUI_enum_start_spinbox.value()
+            enum_by = self.addUI_enum_by_spinbox.value()
+            digits = self.addUI_enum_digits_spinbox.value()
+            current_num  = enum_from + (enum_by * id)
+            enum = part_separator + get_enum_str(current_num, digits)
+        splitter = "."
+        
+        split_name = file_name.split(splitter)
+        new_name = prefix + split_name[0] + suffix + enum
+        for i in range(len(split_name)-2):
+            new_name+= split_name[i+1]
+        new_name+= "." + split_name.pop()
+        file_path = os.path.join(file_dir,new_name)
         return file_path
 
 
     def update_addUI_dependants(self):
-        state = self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
-
-        self.addUI_prefix_checkbox.setEnabled(state)
+ 
         self.update_addUI_prefix_dependants()
 
-        self.addUI_suffix_checkbox.setEnabled(state)
         self.update_addUI_suffix_dependants()
 
-        self.addUI_enum_checkbox.setEnabled(state)
         self.update_addUI_enum_dependants()
 
     def update_addUI_prefix_dependants(self):
-        state = self.addUI_prefix_checkbox.checkState() == QtCore.Qt.CheckState.Checked and \
-            self.addUI.isChecked()
+        state = self.addUI_prefix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.addUI_prefix_editbox.setEnabled(state)
 
     def update_addUI_suffix_dependants(self):
-        state = self.addUI_suffix_checkbox.checkState() == QtCore.Qt.CheckState.Checked and \
-            self.addUI.isChecked()
+        state = self.addUI_suffix_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.addUI_suffix_editbox.setEnabled(state)
 
     def update_addUI_enum_dependants(self):
-        state = self.addUI_enum_checkbox.checkState() == QtCore.Qt.CheckState.Checked and \
-            self.addUI_head_checkbox.checkState() == QtCore.Qt.CheckState.Checked
+        state = self.addUI_enum_checkbox.checkState() == QtCore.Qt.CheckState.Checked
         self.addUI_enum_start_spinbox.setEnabled(state)
         self.addUI_enum_by_spinbox.setEnabled(state)
         self.addUI_enum_digits_spinbox.setEnabled(state)
