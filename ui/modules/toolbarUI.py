@@ -19,7 +19,7 @@ class toolbar_UI(QtWidgets.QWidget):
         self.layout.addWidget(self.btn_scan)
 
         self.layout.setAlignment(QtCore.Qt.AlignTop)
-        self.layout.setContentsMargins(18,0,0,0)
+        self.layout.setContentsMargins(0,0,0,0)
         
         self.containter_types_grp = QtWidgets.QGroupBox("Node Types")
         self.containter_types_grp.setContentsMargins(10,0,0,0)
@@ -40,6 +40,7 @@ class toolbar_UI(QtWidgets.QWidget):
             containter_type_layout.setContentsMargins(0,top_margin,0,0)
             containter_type_label = QtWidgets.QLabel(containter_type.replace("_"," ").title())
             containter_type_label.setContentsMargins(1,top_margin,0,0)
+            containter_type_label.setFont(self.parent.h2)
             containter_type_checkbox = QtWidgets.QCheckBox()
             containter_type_checkbox.setContentsMargins(0,top_margin,0,0)
             containter_type_checkbox.setObjectName(containter_type)

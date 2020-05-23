@@ -21,6 +21,15 @@ def collect(from_selected=False):
     nodes = aImage.get_nodes(sel=from_selected)
     return nodes
 
+def get_file_path(node):
+    return (os.path.normpath(node.parm("filename").eval()))
+
+def get_files(node):
+    file_path = os.path.normpath(node.parm("filename").eval())
+    for sequance_tag in sequance_tags :
+        file_path = file_path.replace(sequance_tag, "*")
+    return (glob.glob(file_path))
+
 def replace_path(nodes, from_, to_):
     from_ = os.path.normpath(from_)
     to_ = os.path.normpath(to_)
@@ -30,14 +39,6 @@ def replace_path(nodes, from_, to_):
             new_name = current_name.replace(from_,to_)
             aImage.set_file_path(node, new_name)
 
-def get_file_path(node):
-    return (os.path.normpath(node.parm("filename").eval()))
+def set_file_path(node, new_path):
+    node.parm("filename").set(new_path)
 
-def set_file_path(abc_node, new_path):
-    return (os.path.normpath(abc_node.parm("filename").set(new_path)))
-
-def get_files(abc_node):
-    file_path = os.path.normpath(abc_node.parm("filename").eval())
-    for sequance_tag in sequance_tags :
-        file_path = file_path.replace(sequance_tag, "*")
-    return (glob.glob(file_path))
