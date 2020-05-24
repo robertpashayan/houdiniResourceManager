@@ -98,6 +98,7 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.sequancerTagPlacerValue = None
 		self.sequancerTagPlacerUI = None
 		self.init_ui()
+		self.init_signals()
 
 
 	def init_ui(self):
@@ -193,6 +194,9 @@ class resourceManagerUI(QtWidgets.QDialog):
 			self.qco_checkboxes.append(_checkbox)
 		self.qco_layout.addStretch()
 		self.main_layout.addWidget(self.qco_group)
+	
+	def init_signals(self):
+		self.qtable.itemSelectionChanged.connect(self.update_qtable)
 
 	def activate_qtable_columns(self):
 
@@ -250,7 +254,6 @@ class resourceManagerUI(QtWidgets.QDialog):
 	def get_formated_node_type(node):
 		return(node.type().name())
 
-
 	def refresh_qtable(self):
 		count = len(self.elements)
 		self.qtable.setRowCount(count)
@@ -269,10 +272,20 @@ class resourceManagerUI(QtWidgets.QDialog):
 
 	
 	def refresh_qtable_cell(self, node, row, column):
-		
+		'''
+		Set's the value of the Qtable's given cellWidget by reading the given node
+		'''
 		column_name = self.qtableListColumnNames_in_order[column]
 		method = self.qtableListColumnData[column_name]
 		text = " " + method(node) +" "
+		item = QtWidgets.QLabel(text)
+		self.qtable.setCellWidget(row, column, item)
+
+	def set_qtable_cell_value(self, new_value, row, column):
+		'''
+		Set's the value of the Qtable's given cellWidget using the given value
+		'''
+		text = " " + new_value +" "
 		item = QtWidgets.QLabel(text)
 		self.qtable.setCellWidget(row, column, item)
 
@@ -295,5 +308,12 @@ class resourceManagerUI(QtWidgets.QDialog):
 		else:
 			val = 0
 		self.progress_bar.setValue(val)
+
+	def update_qtable(self):
+		'''
+		Repopulates Qtable based on current non commited changes on elements for visualisation
+		'''
+		self.refresh_qtable()
+		self.renaming_tools.preview_update()
 
 	
