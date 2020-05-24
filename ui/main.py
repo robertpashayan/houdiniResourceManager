@@ -1,6 +1,7 @@
 import hou
 import imp
 import os
+import subprocess
 from PySide2 import QtCore, QtGui, QtWidgets
 from houdiniResourceManager import resourceManagerCore as rmCore
 from houdiniResourceManager.ui.modules import renamingToolsUI
@@ -99,6 +100,7 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.sequancerTagPlacerUI = None
 		self.init_ui()
 		self.init_signals()
+		self.init_contextual_menu()
 
 
 	def init_ui(self):
@@ -198,6 +200,13 @@ class resourceManagerUI(QtWidgets.QDialog):
 	def init_signals(self):
 		self.qtable.itemSelectionChanged.connect(self.update_qtable)
 
+	def init_contextual_menu(self):
+		self.qtable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+		self.act_open_folder = QtWidgets.QAction("Open Folder in Explorer", None)
+		self.act_open_folder.triggered.connect(self.open_folders_in_explorer)
+		self.qtable.addAction(self.act_open_folder)
+
+
 	def activate_qtable_columns(self):
 
 		self.qtableColumns = []
@@ -289,7 +298,19 @@ class resourceManagerUI(QtWidgets.QDialog):
 		item = QtWidgets.QLabel(text)
 		self.qtable.setCellWidget(row, column, item)
 
-	
+	def open_folders_in_explorer(self):
+		selected_rows = self.qtable_get_selected()
+		selected_row_indices = [row.row() for row in selected_rows]
+		selected_row_indices_count = len(selected_row_indices)
+		for i,index in enumerate(selected_row_indices): 
+			node = self.elements[index]
+			file_path = rmCore.get_file_path(node)
+			file_dir_name_split= os.path.split(file_path)
+			print (os.path.normpath(file_dir_name_split[0]))
+			subprocess.Popen(r'explorer  "' + os.path.normpath(file_dir_name_split[0]) + '"')
+			self.set_progressbar(i,selected_row_indices_count)
+			
+
 	def qtable_get_selected(self):
 		return (self.qtable.selectionModel().selectedRows())
 

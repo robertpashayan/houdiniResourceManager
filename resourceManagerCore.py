@@ -78,7 +78,7 @@ def get_node_specific_sequencers(node):
     return None
 
 
-def modify_path(file_path, prefix=None,  replace_data=None, suffix=None ):
+def modify_file_name(file_path, prefix=None,  replace_data=None, suffix=None ):
 
     file_path_base, file_extension = os.path.splitext(file_path)
 
@@ -95,10 +95,13 @@ def modify_path(file_path, prefix=None,  replace_data=None, suffix=None ):
     
     return (os.path.join(file_path_base_split[0], new_name)+file_extension)
 
-def modify_node(node, prefix=None,  replace_data=None, suffix=None, affect_files=True , copy_files=True):
+def modify_node(node, new_dir=None, prefix=None,  replace_data=None, suffix=None, affect_files=True , copy_files=True):
     file_path = get_file_path(node)
     errors = []
-    new_path = modify_path(file_path, prefix=prefix,  replace_data=replace_data, suffix=suffix )
+    new_path = modify_file_name(file_path, prefix=prefix,  replace_data=replace_data, suffix=suffix )
+    if new_dir:
+        file_dir_name_split= os.path.split(new_path)
+        new_path = (os.path.normpath(os.path.join(file_dir_name_split[0], new_dir))).replace('\\','/')
     sane_sequancers = []
     if affect_files:
         sequance_tags =  get_node_specific_sequencers(node)
@@ -123,7 +126,9 @@ def modify_node(node, prefix=None,  replace_data=None, suffix=None, affect_files
                     for item in sequancer_replacement_data['split_items']:
                         sequance = sequance.replace(item, "")
                     new_file_path_ = new_path.replace(sequancer_replacement_data['sequance_tag'],sequance)
-                    # print "file_path : {}\nfile_path_ : {}\nnew_file_path_: {} \nsequance:{} \nsequance_tag:{}".format(file_path, file_path_, new_file_path_, sequance, sequance_dict['sequance_tag'])
+                    if new_dir:
+                        file_dir_name_split_= os.path.split(new_file_path_)
+                        new_file_path_ = (os.path.normpath(os.path.join(file_dir_name_split_[0], new_dir))).replace('\\','/')
                 if copy_files:
                     shutil.copyfile(file_path_, new_file_path_)
                 else:

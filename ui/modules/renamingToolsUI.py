@@ -18,7 +18,7 @@ class renamingTools_UI(QtWidgets.QWidget):
 
         
     def init_ui(self):
-        self.replaceUI = QtWidgets.QGroupBox("Replace in path")
+        self.replaceUI = QtWidgets.QGroupBox("Replace in File's Name")
         self.replaceUI.setMinimumWidth(350)
         self.replaceUI_layout = QtWidgets.QVBoxLayout()
         self.replaceUI_layout.setContentsMargins(0, 0, 0, 0)
@@ -195,7 +195,7 @@ class renamingTools_UI(QtWidgets.QWidget):
         self.addUI_enum_placement.currentIndexChanged.connect(self.collect_enum)
 
 
-        self.ctrlsUI_btn_apply.clicked.connect(self.preview_update)
+        self.ctrlsUI_btn_apply.clicked.connect(self.commit_changes)
 
     def collect_modification_data(self, part_separator="_"):
         self.modification_data = {}
@@ -318,6 +318,7 @@ class renamingTools_UI(QtWidgets.QWidget):
     def modify(self, commit=False):
         selected_rows = self.parent.qtable_get_selected()
         selected_row_indices = [row.row() for row in selected_rows]
+        selected_row_indices_count = len(selected_row_indices)
         for i,index in enumerate(selected_row_indices): 
             replacement_data = None
             prefix = None
@@ -353,11 +354,12 @@ class renamingTools_UI(QtWidgets.QWidget):
                 file_path = rmCore.get_file_path(node)
                 affect_files = self.ctrlsUI_oprtions_resource_affect.currentIndex() == 0
                 copy_files = self.ctrlsUI_oprtions_file_management.currentIndex() == 1
-                rmCore.modify_node(file_path, prefix=prefix,  replace_data=replacement_data, suffix=suffix, affect_files=affect_files, copy_files=copy_files )
+                errors = rmCore.modify_node(node, prefix=prefix,  replace_data=replacement_data, suffix=suffix, affect_files=affect_files, copy_files=copy_files )
             else:
-                new_path = rmCore.modify_path(file_path, prefix=prefix,  replace_data=replacement_data, suffix=suffix )
+                new_path = rmCore.modify_file_name(file_path, prefix=prefix,  replace_data=replacement_data, suffix=suffix )
                 self.parent.set_qtable_cell_value(new_path, index, 1)
             self.parent.qtable.resizeColumnsToContents()
+            self.parent.set_progressbar(i,selected_row_indices_count)
 
     def preview_update(self):
         self.modify(commit=False)
