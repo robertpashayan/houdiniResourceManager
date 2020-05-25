@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import hou
 import imp
 import os
@@ -172,29 +173,28 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.qco_layout = QtWidgets.QHBoxLayout()
 		self.qco_group.setLayout(self.qco_layout)
 		self.qco_layout.setContentsMargins(4,4,4,4)
+		self.qco_layout.setSpacing(0)
 
 		#This dict Contains the Listing names with their methods, all methods take the node as a parameter
-		self.qtableListColumnData = {
-			'Node Path':(rmCore.get_node_path),
-			'Resource FilePath':(rmCore.get_file_path),
-			'File Count':(self.get_formated_files_count),
-			'Files Size':(self.get_formated_files_size),
-			'Node Type':(self.get_formated_node_type)
-		}
-		self.qtableListColumnNames_in_order = ['Node Path','Resource FilePath','File Count','Files Size','Node Type']
+		self.qtableListColumnData = OrderedDict()
+		self.qtableListColumnData['Node Path'] = rmCore.get_node_path
+		self.qtableListColumnData['Resource FilePath'] = rmCore.get_file_path
+		self.qtableListColumnData['File Count'] = self.get_formated_files_count
+		self.qtableListColumnData['Files Size'] = self.get_formated_files_size
+		self.qtableListColumnData['Node Type'] = self.get_formated_node_type
 		self.qtableColumns = []
 		self.qco_checkboxes=[]
-		for name in self.qtableListColumnNames_in_order:
+		for name in self.qtableListColumnData.keys():
 			_label = QtWidgets.QLabel(name)
 			_label.setFont(self.h2)
 			_checkbox = custom_widgets.CheckBox(data=name)
 			_checkbox.setChecked(True)
-			self.qco_layout.addWidget(_label)
 			self.qco_layout.addWidget(_checkbox)
-			self.qco_layout.addSpacing(5)
+			self.qco_layout.addWidget(_label)
+			self.qco_layout.addStretch()
 			_checkbox.clicked.connect(self.activate_qtable_columns)
 			self.qco_checkboxes.append(_checkbox)
-		self.qco_layout.addStretch()
+		
 		self.main_layout.addWidget(self.qco_group)
 	
 	def init_signals(self):
@@ -284,7 +284,7 @@ class resourceManagerUI(QtWidgets.QDialog):
 		'''
 		Set's the value of the Qtable's given cellWidget by reading the given node
 		'''
-		column_name = self.qtableListColumnNames_in_order[column]
+		column_name = self.qtableListColumnData.keys()[column]
 		method = self.qtableListColumnData[column_name]
 		text = " " + method(node) +" "
 		item = QtWidgets.QLabel(text)

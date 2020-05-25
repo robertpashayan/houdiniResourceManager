@@ -34,18 +34,18 @@ class toolbar_UI(QtWidgets.QWidget):
 
         self.containter_type_checkboxes = []
         top_margin = 4
-        for i,containter_type in enumerate(rmCore.container_types) :
+        for node_type in rmCore.node_type_data:
             
             containter_type_widget = QtWidgets.QWidget()
             containter_type_widget.setContentsMargins(0,top_margin,0,0)
             containter_type_layout = QtWidgets.QHBoxLayout()
             containter_type_layout.setContentsMargins(0,top_margin,0,0)
-            containter_type_label = QtWidgets.QLabel(containter_type.replace("_"," ").title())
+            containter_type_label = QtWidgets.QLabel(node_type.replace("_"," ").title())
             containter_type_label.setContentsMargins(1,top_margin,0,0)
             containter_type_label.setFont(self.parent.h2)
-            containter_type_checkbox = custom_widgets.CheckBox(data=containter_type)
+            containter_type_checkbox = custom_widgets.CheckBox(data=node_type)
             containter_type_checkbox.setContentsMargins(0,top_margin,0,0)
-            containter_type_checkbox.setObjectName(containter_type)
+            containter_type_checkbox.setObjectName(node_type)
             containter_type_layout.addWidget(containter_type_checkbox)
             containter_type_layout.addWidget(containter_type_label)
             containter_type_widget.setLayout(containter_type_layout)
