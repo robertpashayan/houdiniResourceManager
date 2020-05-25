@@ -263,7 +263,56 @@ class renamingTools_UI(QtWidgets.QWidget):
                 num_str = "0" + num_str
             return num_str
 
+    def modify(self, commit=False):
+        selected_rows = self.parent.qtable_get_selected()
+        selected_row_indices = [row.row() for row in selected_rows]
+        selected_row_indices_count = len(selected_row_indices)
+        for i,index in enumerate(selected_row_indices): 
+            replacement_data = None
+            prefix = None
+            suffix = None
 
+            if 'replace_data' in self.modification_data:
+                replacement_data = self.modification_data['replace_data']
+            
+            if 'prefix' in self.modification_data:
+                prefix = self.modification_data['prefix']
+
+            if 'suffix' in self.modification_data:
+                suffix = self.modification_data['suffix']
+
+            if 'enum_data' in self.modification_data:
+
+                enum_data = self.modification_data['enum_data']
+                current_num  = enum_data['from'] + (enum_data['by'] * i)
+                enum_str = enum_data['prefix'] + self.get_formatted_str(current_num, enum_data['number of digits'])
+                if suffix:
+                    if enum_data['placement'] == 'After Suffix':
+                        suffix += enum_str
+                    else:
+
+                        suffix = enum_str + suffix
+                else:
+                    suffix = enum_str
+                
+            node = self.parent.elements[index]
+            file_path = rmCore.get_file_path(node)
+            if commit:
+                node = self.parent.elements[index]
+                file_path = rmCore.get_file_path(node)
+                affect_files = self.ctrlsUI_oprtions_resource_affect.currentIndex() == 0
+                copy_files = self.ctrlsUI_oprtions_file_management.currentIndex() == 1
+                errors = rmCore.modify_node(node, prefix=prefix,  replace_data=replacement_data, suffix=suffix, affect_files=affect_files, copy_files=copy_files )
+            else:
+                new_path = rmCore.modify_file_name(file_path, prefix=prefix,  replace_data=replacement_data, suffix=suffix )
+                self.parent.set_qtable_cell_value(new_path, index, 1)
+            self.parent.qtable.resizeColumnsToContents()
+            self.parent.set_progressbar(i,selected_row_indices_count)
+
+    def set_new_directory(self):
+        new_dir = hou.ui.selectFile(file_type=hou.fileType.Directory)
+        if new_dir:
+            self.modification_data['new_dir'] = new_dir
     def update_addUI_dependants(self):
  
         self.update_addUI_prefix_dependants()
@@ -314,52 +363,6 @@ class renamingTools_UI(QtWidgets.QWidget):
         elif 'replace_data' in self.modification_data:
             del self.modification_data['replace_data']
             self.preview_update()
-
-    def modify(self, commit=False):
-        selected_rows = self.parent.qtable_get_selected()
-        selected_row_indices = [row.row() for row in selected_rows]
-        selected_row_indices_count = len(selected_row_indices)
-        for i,index in enumerate(selected_row_indices): 
-            replacement_data = None
-            prefix = None
-            suffix = None
-
-            if 'replace_data' in self.modification_data:
-                replacement_data = self.modification_data['replace_data']
-            
-            if 'prefix' in self.modification_data:
-                prefix = self.modification_data['prefix']
-
-            if 'suffix' in self.modification_data:
-                suffix = self.modification_data['suffix']
-
-            if 'enum_data' in self.modification_data:
-
-                enum_data = self.modification_data['enum_data']
-                current_num  = enum_data['from'] + (enum_data['by'] * i)
-                enum_str = enum_data['prefix'] + self.get_formatted_str(current_num, enum_data['number of digits'])
-                if suffix:
-                    if enum_data['placement'] == 'After Suffix':
-                        suffix += enum_str
-                    else:
-
-                        suffix = enum_str + suffix
-                else:
-                    suffix = enum_str
-                
-            node = self.parent.elements[index]
-            file_path = rmCore.get_file_path(node)
-            if commit:
-                node = self.parent.elements[index]
-                file_path = rmCore.get_file_path(node)
-                affect_files = self.ctrlsUI_oprtions_resource_affect.currentIndex() == 0
-                copy_files = self.ctrlsUI_oprtions_file_management.currentIndex() == 1
-                errors = rmCore.modify_node(node, prefix=prefix,  replace_data=replacement_data, suffix=suffix, affect_files=affect_files, copy_files=copy_files )
-            else:
-                new_path = rmCore.modify_file_name(file_path, prefix=prefix,  replace_data=replacement_data, suffix=suffix )
-                self.parent.set_qtable_cell_value(new_path, index, 1)
-            self.parent.qtable.resizeColumnsToContents()
-            self.parent.set_progressbar(i,selected_row_indices_count)
 
     def preview_update(self):
         self.modify(commit=False)

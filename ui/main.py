@@ -6,20 +6,18 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from houdiniResourceManager import resourceManagerCore as rmCore
 from houdiniResourceManager.ui.modules import renamingToolsUI
 from houdiniResourceManager.ui.modules import toolbarUI
+from houdiniResourceManager.ui import custom_widgets
 
 imp.reload(rmCore)
 imp.reload(renamingToolsUI)
 imp.reload(toolbarUI)
-
+imp.reload(custom_widgets)
 """
 TODO:
 Inspect option in table view, which will focus on the selected node in the node view
 """
 
-class CheckBox(QtWidgets.QCheckBox):
-	def __init__(self, data=None):
-		super(CheckBox, self).__init__()
-		self.data = data
+
 
 class sequancerTagPlacer(QtWidgets.QDialog):
 	def __init__(self, old_path, tag, parent=None):
@@ -85,6 +83,7 @@ class sequancerTagPlacer(QtWidgets.QDialog):
 class resourceManagerUI(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super(resourceManagerUI, self).__init__(parent)
+		rmCore.init_node_type_data()
 		self.version = 'alpha v0.0'
 		self.setWindowTitle('Houdini Resource Manager' + ' ' + self.version)
 		self.setMinimumSize(1279, 850)
@@ -98,10 +97,11 @@ class resourceManagerUI(QtWidgets.QDialog):
 		self.elements = []
 		self.sequancerTagPlacerValue = None
 		self.sequancerTagPlacerUI = None
+		self.node_types_to_collect = []
 		self.init_ui()
 		self.init_signals()
 		self.init_contextual_menu()
-
+		
 
 	def init_ui(self):
 		# Main Sections
@@ -187,7 +187,7 @@ class resourceManagerUI(QtWidgets.QDialog):
 		for name in self.qtableListColumnNames_in_order:
 			_label = QtWidgets.QLabel(name)
 			_label.setFont(self.h2)
-			_checkbox = CheckBox(data=name)
+			_checkbox = custom_widgets.CheckBox(data=name)
 			_checkbox.setChecked(True)
 			self.qco_layout.addWidget(_label)
 			self.qco_layout.addWidget(_checkbox)

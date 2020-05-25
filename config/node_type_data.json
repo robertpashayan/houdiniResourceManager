@@ -1,0 +1,67 @@
+{
+	"alembic": 
+	{
+	"file_name_param": "fileName",
+    "sequance_tags":
+        [
+		"$F"
+		]
+	},
+
+    "arnold::image":
+    {
+	"file_name_param": "filename",
+    "sequance_tags":
+        [
+        "<udim>"
+        ]
+    },
+    "attribfrommap":
+    {
+        "file_name_param": "filename",
+        "sequance_tags":
+            [
+            "%(UDIM)d"
+            ]
+    },
+    "file":
+    {
+        "file_name_param": "file",
+        "sequance_tags":
+            [
+            "$F"
+            ]
+    },
+    "filecache":
+    {
+        "file_name_param": "file",
+        "sequance_tags":
+            [
+            "$F"
+            ]
+    },
+    "rop_alembic":
+    {
+        "file_name_param": "file",
+        "sequance_tags":
+            [
+            "$F"
+            ]
+    },
+    "rop_fbx":
+    {
+        "file_name_param": "file",
+        "sequance_tags":
+            [
+            "$F"
+            ]
+    },
+    "rop_geometry":
+    {
+        "file_name_param": "file",
+        "sequance_tags":
+            [
+            "$F"
+            ]
+    }
+}

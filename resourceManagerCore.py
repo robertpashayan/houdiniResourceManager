@@ -1,61 +1,56 @@
+import glob
 import imp
+import json
 import os
 import shutil
 
+from houdiniResourceManager.modules import node_manager
+imp.reload(node_manager)
 
-from houdiniResourceManager.modules import hou_alembic
-from houdiniResourceManager.modules import hou_aImage
-from houdiniResourceManager.modules import hou_attribfrommap
-from houdiniResourceManager.modules import hou_file
+node_type_data = None
 
+def init_node_type_data():
+	'''
+	Set's the global variable config the configuration fetched from the json file "node_type_data.json" in config directory
+	'''
+	global node_type_data
+	class JSON_Loading_Error(Exception):
+		pass
 
+	this_dir = os.path.dirname(__file__)
+	json_file_path = os.path.normpath(os.path.join(this_dir,"config","node_type_data.json"))
+	
+	if json_file_path and os.path.exists(json_file_path):
+		with open(json_file_path, 'r') as file:
+			node_type_data = json.load(file)
 
-imp.reload(hou_alembic)
-imp.reload(hou_aImage)
-imp.reload(hou_attribfrommap)
-imp.reload(hou_file)
+	else:
+		raise JSON_Loading_Error("JSON file '" + os.path.normpath(json_file_path) + "' does not exist!")
 
-#common_properties to retrieve [name, path]
-container_types =   ['alembic',   'arnold::image',  'attribfrommap',    'file','filecache','rop_alembic','rop_fbx','rop_geometry']
-# container_types =   ['arnold::image']
-container_modules = [hou_alembic, hou_aImage,       hou_attribfrommap,  hou_file]
-container_modules_activation_state = [False for x in container_modules]
-# container_modules = [hou_aImage]
-
-
-def collect(from_selected=False):
+def collect(module_names, from_selected=False):
     nodes=[]
-    for i,container_module in enumerate(container_modules):
-        if container_modules_activation_state[i]:
-            container_module_nodes = container_module.collect(from_selected=from_selected)
-            if container_module_nodes:
-                nodes+=container_module_nodes
+    for module_name in module_names:
+		module_nodes = node_manager.get_nodes_by_type(module_name)
+		if module_nodes:
+			nodes+=module_nodes
     return nodes
 
-
-def get_nodes_module(node):
-    '''
-    Returns the module for the given node if the node in unsupported returns None
-
-    :param node: houdini scene node
-    :returns: the module of the given node or None if node is unsupported
-    '''
-    node_type = node.type().name()
-    if node_type in container_types:
-        return (container_modules[container_types.index(node_type)])
-    return None
-
 def get_file_path(node):
-    node_module = get_nodes_module(node)
-    if node_module:
-        return node_module.get_file_path(node)
-    return None
+	global node_type_data
+	if node_type_data:
+		file_name_parm = node_type_data[node.type().name()]['file_name_param']
+		return (os.path.normpath(node.parm(file_name_parm).eval()))
+	return None
 
 def get_files(node):
-    node_module = get_nodes_module(node)
-    if node_module:
-        return node_module.get_files(node)
-    return None
+	global node_type_data
+	if node_type_data:
+		file_path = get_file_path(node)
+		sequance_tags = node_type_data[node.type().name()]['sequance_tags']
+		for sequance_tag in sequance_tags :
+			file_path = file_path.replace(sequance_tag, "*")
+		return (glob.glob(file_path))
+	return None
 
 def get_files_count(node):
     files=get_files(node)
@@ -72,9 +67,9 @@ def get_node_path(node):
     return (node.path())
 
 def get_node_specific_sequencers(node):
-    node_module = get_nodes_module(node)
-    if node_module:
-        return node_module.sequance_tags
+    global node_type_data
+    if node_type_data:
+        return (node_type_data[node.type().name()]['sequance_tags'])
     return None
 
 
@@ -139,26 +134,11 @@ def modify_node(node, new_dir=None, prefix=None,  replace_data=None, suffix=None
     return errors
 
 
-
-
-def replace_path(nodes, from_, to_):
-    nodes_by_modules = sort_nodes(nodes)
-    acc = 0
-    for mnodes in nodes_by_modules:
-        container_modules[acc].replace_path(mnodes, from_, to_)
-        acc+=1
-
 def set_file_path(node, new_path):
-    node_module = get_nodes_module(node)
-    if node_module:
-        node_module.set_file_path(node,new_path)
-        return True
-    return False
+	global node_type_data
+	if node_type_data:
+		file_name_parm = node_type_data[node.type().name()]['file_name_param']
+		node.parm(file_name_parm).set(new_path)
+		return True
+	return False
 
-def sort_nodes(nodes):
-    nodes_by_module = []
-    for i in range(len(container_modules)):
-        module_type = container_types[i]
-        module_nodes = [node for node in nodes if node.type().name()==module_type]
-        nodes_by_module.append(module_nodes)
-    return nodes_by_module

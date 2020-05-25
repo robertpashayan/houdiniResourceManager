@@ -3,8 +3,10 @@ import os
 import hou
 from PySide2 import QtCore,QtGui, QtWidgets
 from houdiniResourceManager import resourceManagerCore as rmCore
+from houdiniResourceManager.ui import custom_widgets
 
 imp.reload(rmCore)
+imp.reload(custom_widgets)
 
 class toolbar_UI(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -41,7 +43,7 @@ class toolbar_UI(QtWidgets.QWidget):
             containter_type_label = QtWidgets.QLabel(containter_type.replace("_"," ").title())
             containter_type_label.setContentsMargins(1,top_margin,0,0)
             containter_type_label.setFont(self.parent.h2)
-            containter_type_checkbox = QtWidgets.QCheckBox()
+            containter_type_checkbox = custom_widgets.CheckBox(data=containter_type)
             containter_type_checkbox.setContentsMargins(0,top_margin,0,0)
             containter_type_checkbox.setObjectName(containter_type)
             containter_type_layout.addWidget(containter_type_checkbox)
@@ -56,11 +58,11 @@ class toolbar_UI(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
     def activate_module(self):
-        rmCore.container_modules_activation_state = [(chkbox.checkState() == QtCore.Qt.CheckState.Checked) for chkbox in self.containter_type_checkboxes ]
+        self.parent.node_types_to_collect = [chkbox.data for chkbox in self.containter_type_checkboxes if (chkbox.checkState() == QtCore.Qt.CheckState.Checked)]
 
     def collect_nodes(self):
         if self.parent:
-            self.parent.elements = rmCore.collect()
+            self.parent.elements = rmCore.collect(self.parent.node_types_to_collect)
             self.parent.refresh_qtable()
             self.parent.qtable.resizeColumnsToContents()
             
