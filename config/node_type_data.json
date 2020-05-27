@@ -14,6 +14,10 @@
     "sequance_tags":
         [
         "<udim>"
+        ],
+        "sequance_intervals":
+        [
+            "1001-9999"
         ]
     },
     "attribfrommap":

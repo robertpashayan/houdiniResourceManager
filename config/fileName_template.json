@@ -1,0 +1,42 @@
+{
+    "node_type":"arnold::image",
+    "fileName_parts":
+    {
+        "Prefix":"*",
+        "separator0":"_",
+        "LOD":
+        [
+            "LOW",
+            "MID",
+            "HIGH"
+        ],
+        "separator1":"_",
+        "Base":"*",
+        "separator2":"_",
+        "Map Type":
+        [
+            "BMP",
+            "COL",
+            "DSP",
+            "IOR",
+            "MSK",
+            "MTL",
+            "NRM",
+            "RFL",
+            "RFR",
+            "SPR",
+            "SSS",
+            "TID",
+            "VDP"
+        ],
+        "separator3":"_",
+        "Version":"0-999",
+        "separator4":".",
+        "Sequancer":"<udim>"
+    },
+    "unauthorised_characters_in_parts":
+    [
+        " ",
+        "_"
+    ]
+}

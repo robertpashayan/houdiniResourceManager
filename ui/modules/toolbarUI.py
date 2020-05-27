@@ -2,7 +2,7 @@ import imp
 import os
 import hou
 from PySide2 import QtCore,QtGui, QtWidgets
-from houdiniResourceManager import resourceManagerCore as rmCore
+from houdiniResourceManager.core import core as rmCore
 from houdiniResourceManager.ui import custom_widgets
 
 imp.reload(rmCore)

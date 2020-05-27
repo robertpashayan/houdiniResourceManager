@@ -2,7 +2,7 @@ import imp
 import os
 import hou
 from PySide2 import QtCore, QtGui, QtWidgets
-from houdiniResourceManager import resourceManagerCore as rmCore
+from houdiniResourceManager.core import core as rmCore
 
 imp.reload(rmCore)
 
@@ -367,8 +367,6 @@ class renamingTools_UI(QtWidgets.QWidget):
 			node = self.parent.elements[index]
 			file_path = rmCore.get_file_path(node)
 			if commit:
-				node = self.parent.elements[index]
-				file_path = rmCore.get_file_path(node)
 				affect_files = self.ctrlsUI_oprtions_resource_affect.currentIndex() == 0
 				copy_files = self.ctrlsUI_oprtions_file_management.currentIndex() == 1
 				errors = rmCore.modify_node(node, cut_data = cut_data, new_dir = new_dir, prefix=prefix,  replace_data=replacement_data, suffix=suffix, affect_files=affect_files, copy_files=copy_files )

@@ -2,9 +2,11 @@ from collections import OrderedDict
 import hou
 import imp
 import os
+import re
 import subprocess
+from functools import partial
 from PySide2 import QtCore, QtGui, QtWidgets
-from houdiniResourceManager import resourceManagerCore as rmCore
+from houdiniResourceManager.core import core as rmCore
 from houdiniResourceManager.ui.modules import renamingToolsUI
 from houdiniResourceManager.ui.modules import toolbarUI
 from houdiniResourceManager.ui import custom_widgets
@@ -19,73 +21,11 @@ Inspect option in table view, which will focus on the selected node in the node 
 """
 
 
-
-class sequancerTagPlacer(QtWidgets.QDialog):
-	def __init__(self, old_path, tag, parent=None):
-		super(sequancerTagPlacer, self).__init__(parent)
-		self.parent = parent
-		self.setWindowTitle(self.parent.windowTitle() + " : Sequance Tag Placer")
-		self.setParent(parent,  QtCore.Qt.Window)
-		self.old_path = old_path
-		self.new_path = old_path
-		self.tag = tag
-		self.setFixedHeight(150)
-		self.setMinimumWidth(800)
-		self.init_ui()
-		
-		
-
-	def init_ui(self):
-		self.main_layout = QtWidgets.QVBoxLayout()
-		self.main_layout.setAlignment(QtCore.Qt.AlignCenter)
-		self.main_layout.setContentsMargins(0, 0, 0, 0)
-		self.path_label = QtWidgets.QLabel()
-		self.path_label.setFont(self.parent.h2)
-		self.main_layout.addWidget(self.path_label)
-
-		self.controls = QtWidgets.QWidget()
-		self.controls.setFixedWidth(790)
-		self.controls_layout = QtWidgets.QHBoxLayout()
-
-		self.start_pos_label = QtWidgets.QLabel(" Indicate Start Position  ")
-		self.start_pos_label.setFont(self.parent.h2)
-		self.start_pos_spiner = QtWidgets.QSpinBox()
-		self.start_pos_spiner.setMaximum(len(self.old_path) - 1)
-		self.start_pos_spiner.setMinimum(0)
-		self.length_label = QtWidgets.QLabel(" Indicate length  ")
-		self.length_label.setFont(self.parent.h2)
-		self.length_spiner = QtWidgets.QSpinBox()
-		self.length_spiner.setMaximum(len(self.old_path))
-		self.length_spiner.setMinimum(1)
-		self.btn_validate = QtWidgets.QPushButton("Validate")
-		self.btn_validate.setFixedHeight(60)
-		self.controls_layout.addWidget(self.start_pos_label)
-		self.controls_layout.addWidget(self.start_pos_spiner)
-		self.controls_layout.addWidget(self.length_label)
-		self.controls_layout.addWidget(self.length_spiner)
-		self.controls_layout.addWidget(self.btn_validate)
-		self.controls_layout.setContentsMargins(10, 0, 0, 0)
-		self.controls.setLayout(self.controls_layout)
-
-		self.main_layout.addWidget(self.path_label)
-		self.main_layout.addWidget(self.controls)
-		self.setLayout(self.main_layout)
-		self.refresh_qtable()
-
-	def refresh_qtable(self):
-		start = self.start_pos_spiner.value()
-		length = self.length_spiner.value()
-		self.new_path = self.old_path[0:start] + self.tag + self.old_path[start+length:]
-		self.path_label.setText("    " + self.new_path)
-
-	def closeEvent(self, event):
-		self.parent.sequancerTagPlacerValue = self.new_path
-
 class resourceManagerUI(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super(resourceManagerUI, self).__init__(parent)
 		rmCore.init_node_type_data()
-		self.version = 'alpha v0.0'
+		self.version = 'beta v0.0'
 		self.setWindowTitle('Houdini Resource Manager' + ' ' + self.version)
 		self.setMinimumSize(1279, 850)
 		self.title_font = QtGui.QFont("Calibri")
@@ -203,8 +143,40 @@ class resourceManagerUI(QtWidgets.QDialog):
 	def init_contextual_menu(self):
 		self.qtable.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 		self.act_open_folder = QtWidgets.QAction("Open Folder in Explorer", None)
-		self.act_open_folder.triggered.connect(self.open_folders_in_explorer)
+		self.act_node_separator = QtWidgets.QAction(self.qtable)
+		self.act_node_separator.setSeparator(True)
+		self.act_go_to_node = QtWidgets.QAction("Select Node", None)
+		self.act_copy_past_dir_separator = QtWidgets.QAction(self.qtable)
+		self.act_copy_past_dir_separator.setSeparator(True)
+		self.act_copy_dir_path = QtWidgets.QAction("Copy Directory Path", None)
+		self.act_past_dir_path = QtWidgets.QAction("Past Directory Path", None)
+		self.act_copy_past_name_separator = QtWidgets.QAction(self.qtable)
+		self.act_copy_past_name_separator.setSeparator(True)
+		self.act_copy_filename_path = QtWidgets.QAction("Copy FileName", None)
+		self.act_past_filename_path = QtWidgets.QAction("Past FileName", None)
+		self.act_sequancer_separator = QtWidgets.QAction(self.qtable)
+		self.act_sequancer_separator.setSeparator(True)
+		self.act_add_sequancer = QtWidgets.QAction("Add Sequancer Tag", None)
+
+		self.act_open_folder.triggered.connect(self.ctx_open_folders_in_explorer)
+		self.act_go_to_node.triggered.connect(self.ctx_go_to_node)
+		self.act_copy_dir_path.triggered.connect(self.ctx_copy_file_path)
+		self.act_past_dir_path.triggered.connect(self.ctx_past_file_path)
+		self.act_copy_filename_path.triggered.connect(self.ctx_copy_file_name)
+		self.act_past_filename_path.triggered.connect(self.ctx_past_file_name)
+		self.act_add_sequancer.triggered.connect(self.ctx_add_sequancer)
+
 		self.qtable.addAction(self.act_open_folder)
+		self.qtable.addAction(self.act_node_separator)
+		self.qtable.addAction(self.act_go_to_node)
+		self.qtable.addAction(self.act_copy_past_dir_separator)
+		self.qtable.addAction(self.act_copy_dir_path)
+		self.qtable.addAction(self.act_past_dir_path)
+		self.qtable.addAction(self.act_copy_past_name_separator)
+		self.qtable.addAction(self.act_copy_filename_path)
+		self.qtable.addAction(self.act_past_filename_path)
+		self.qtable.addAction(self.act_sequancer_separator)
+		self.qtable.addAction(self.act_add_sequancer)
 
 
 	def activate_qtable_columns(self):
@@ -240,6 +212,13 @@ class resourceManagerUI(QtWidgets.QDialog):
 			self.header.hide()
 			self.qtable.clear()
 
+	@staticmethod
+	def error(message_):
+		hou.ui.displayMessage(message_, title="Houdini Resource Manager")
+
+	@staticmethod
+	def query(message_):
+		return (hou.ui.displayConfirmation(message_, title="Houdini Resource Manager"))
 
 	@staticmethod
 	def get_formated_files_count(node):
@@ -298,7 +277,101 @@ class resourceManagerUI(QtWidgets.QDialog):
 		item = QtWidgets.QLabel(text)
 		self.qtable.setCellWidget(row, column, item)
 
-	def open_folders_in_explorer(self):
+	def ctx_add_sequancer(self):
+		selected_rows = self.qtable_get_selected()
+		selected_row_indices = [row.row() for row in selected_rows]
+		selected_row_indices_count = len(selected_row_indices)
+		rmCore.init_node_type_data()
+		double_check = self.query("Would you like to verify and edit the sequancer placements to avoid errors?")
+		for i,index in enumerate(selected_row_indices): 
+			node = self.elements[index]
+			file_path = rmCore.get_file_path(node)
+			file_dir_name_split= os.path.split(file_path)
+			file_name_ext_split = os.path.splitext(file_dir_name_split[1])
+			sequancers = rmCore.node_type_data[node.type().name()]['sequance_tags']
+			intevals = rmCore.node_type_data[node.type().name()]['sequance_intervals']
+			if sequancers:
+				if len(sequancers) > 1:
+					self.error("Many sequancers are not supported yet")
+				else:
+					sequance_interval = intevals[0].split("-")
+					regex_pattern = "("
+					for i,s in enumerate(sequance_interval[0]):
+						regex_pattern += "[" + s + "-" + sequance_interval[1][i] + "]"
+					regex_pattern += ")"
+					regex_match = re.search(regex_pattern, file_name_ext_split[0])
+					new_fileName = file_name_ext_split[0][:regex_match.start() ] + sequancers[0] + file_name_ext_split[0][regex_match.end():]
+					new_path = rmCore.modify_file_path(file_path, new_fileName=new_fileName)
+					rmCore.modify_node(node, new_fileName=new_fileName, affect_files=False)
+				self.set_progressbar(i,selected_row_indices_count)
+				self.set_qtable_cell_value(new_path, index, 1)
+		self.qtable.resizeColumnsToContents()
+
+
+	def ctx_copy_file_name(self):
+		selected_rows = self.qtable_get_selected()
+		if len(selected_rows) == 1:
+			app = QtGui.QGuiApplication.instance()
+			clipboard = app.clipboard()
+			node = self.elements[selected_rows[0].row()]
+			file_path = rmCore.get_file_path(node)
+			file_path_base, file_extension = os.path.splitext(file_path)
+			file_path_base_split = os.path.split(file_path_base)
+			string = file_path_base_split[1]
+			clipboard.setText(string)
+		else:
+			self.error("Only One Selection Allowed for this action!")
+
+	def ctx_copy_file_path(self):
+		selected_rows = self.qtable_get_selected()
+		if len(selected_rows) == 1:
+			app = QtGui.QGuiApplication.instance()
+			clipboard = app.clipboard()
+			node = self.elements[selected_rows[0].row()]
+			file_path = rmCore.get_file_path(node)
+			file_path_base_split = os.path.split(file_path)
+			string = file_path_base_split[0]
+			clipboard.setText(string)
+		else:
+			self.error("Only One Selection Allowed for this action!")		
+	
+	def ctx_past_file_name(self):
+		selected_rows = self.qtable_get_selected()
+		app = QtGui.QGuiApplication.instance()
+		clipboard = app.clipboard()
+		string = clipboard.text()
+		if self.query("Would you like to past this text as dir path '" + string + "' on selected nodes?"):
+			node = self.elements[selected_rows[0].row()]
+			selected_row_indices = [row.row() for row in selected_rows]
+			selected_row_indices_count = len(selected_row_indices)
+			for i,index in enumerate(selected_row_indices): 
+				node = self.elements[index]
+				rmCore.modify_node(node, new_fileName = string, affect_files=False, copy_files=False)
+			self.refresh_qtable()
+
+	def ctx_past_file_path(self):
+		selected_rows = self.qtable_get_selected()
+		app = QtGui.QGuiApplication.instance()
+		clipboard = app.clipboard()
+		string = clipboard.text()
+		if self.query("Would you like to past this text as dir path '" + string + "' on selected nodes?"):
+			node = self.elements[selected_rows[0].row()]
+			selected_row_indices = [row.row() for row in selected_rows]
+			selected_row_indices_count = len(selected_row_indices)
+			for i,index in enumerate(selected_row_indices): 
+				node = self.elements[index]
+				rmCore.modify_node(node, new_dir = string, affect_files=False, copy_files=False)
+			self.refresh_qtable()
+
+	def ctx_go_to_node(self):
+		selected_rows = self.qtable_get_selected()
+		if len(selected_rows) == 1:
+			node = self.elements[selected_rows[0].row()]
+			node.setCurrent(True, clear_all_selected=True)
+		else:
+			self.error("Only One Selection Allowed for this action!")
+
+	def ctx_open_folders_in_explorer(self):
 		selected_rows = self.qtable_get_selected()
 		selected_row_indices = [row.row() for row in selected_rows]
 		selected_row_indices_count = len(selected_row_indices)
@@ -306,7 +379,6 @@ class resourceManagerUI(QtWidgets.QDialog):
 			node = self.elements[index]
 			file_path = rmCore.get_file_path(node)
 			file_dir_name_split= os.path.split(file_path)
-			print (os.path.normpath(file_dir_name_split[0]))
 			subprocess.Popen(r'explorer  "' + os.path.normpath(file_dir_name_split[0]) + '"')
 			self.set_progressbar(i,selected_row_indices_count)
 			

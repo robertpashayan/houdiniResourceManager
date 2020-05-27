@@ -6,20 +6,39 @@ import os
 import shutil
 
 
-from houdiniResourceManager.modules import node_manager
+from houdiniResourceManager.core import node_manager
 imp.reload(node_manager)
 
 node_type_data = None
+file_name_data = None
+class JSON_Loading_Error(Exception):
+		pass
+
+def init_file_name_data():
+	'''
+	Set's the global variable config the configuration fetched from the json file "node_type_data.json" in config directory
+	'''
+	global file_name_data
+	
+
+	this_dir = os.path.dirname((os.path.dirname(__file__)))
+	json_file_path = os.path.normpath(os.path.join(this_dir,"config","fileName_template.json"))
+	
+	if json_file_path and os.path.exists(json_file_path):
+		with open(json_file_path, 'r') as file:
+			file_name_data = json.load(file, object_pairs_hook=OrderedDict)
+
+	else:
+		raise JSON_Loading_Error("JSON file '" + os.path.normpath(json_file_path) + "' does not exist!")
 
 def init_node_type_data():
 	'''
 	Set's the global variable config the configuration fetched from the json file "node_type_data.json" in config directory
 	'''
 	global node_type_data
-	class JSON_Loading_Error(Exception):
-		pass
+	
 
-	this_dir = os.path.dirname(__file__)
+	this_dir = os.path.dirname((os.path.dirname(__file__)))
 	json_file_path = os.path.normpath(os.path.join(this_dir,"config","node_type_data.json"))
 	
 	if json_file_path and os.path.exists(json_file_path):
@@ -28,6 +47,7 @@ def init_node_type_data():
 
 	else:
 		raise JSON_Loading_Error("JSON file '" + os.path.normpath(json_file_path) + "' does not exist!")
+
 
 def collect(module_names, from_selected=False):
 	nodes=[]
@@ -75,7 +95,7 @@ def get_node_specific_sequencers(node):
 	return None
 
 
-def modify_file_path(file_path, cut_data = None, new_dir = None, prefix=None,  replace_data=None, suffix=None ):
+def modify_file_path(file_path, cut_data = None, new_dir = None, new_fileName = None, prefix=None,  replace_data=None, suffix=None ):
 
 	file_path_base, file_extension = os.path.splitext(file_path)
 
@@ -83,25 +103,28 @@ def modify_file_path(file_path, cut_data = None, new_dir = None, prefix=None,  r
 	file_path_base_split = os.path.split(file_path_base)
 	directory_ = file_path_base_split[0]
 	new_name = file_path_base_split[1]
-	if cut_data:
-		new_name = new_name[:cut_data["from"]] +  new_name[cut_data["to"]:]
-	if replace_data:
-		new_name = new_name.replace(replace_data["from"], replace_data["to"])
-	if prefix:
-		new_name = prefix + new_name
+	if new_fileName:
+		new_name = new_fileName
+	else:
+		if cut_data:
+			new_name = new_name[:cut_data["from"]] +  new_name[cut_data["to"]:]
+		if replace_data:
+			new_name = new_name.replace(replace_data["from"], replace_data["to"])
+		if prefix:
+			new_name = prefix + new_name
 
-	if suffix:
-		new_name = new_name + suffix
+		if suffix:
+			new_name = new_name + suffix
 
 	if new_dir:
 		directory_ = new_dir
 
 	return (os.path.join(directory_, new_name)+file_extension)
 
-def modify_node(node, cut_data = None, new_dir=None, prefix=None,  replace_data=None, suffix=None, affect_files=True , copy_files=True):
+def modify_node(node, cut_data = None, new_dir=None,  new_fileName = None, prefix=None,  replace_data=None, suffix=None, affect_files=True , copy_files=True):
 	file_path = get_file_path(node)
 	errors = []
-	new_path = modify_file_path(file_path, cut_data = cut_data, new_dir=new_dir, prefix=prefix,  replace_data=replace_data, suffix=suffix )
+	new_path = modify_file_path(file_path, cut_data = cut_data, new_dir=new_dir, new_fileName=new_fileName, prefix=prefix,  replace_data=replace_data, suffix=suffix )
 	sane_sequancers = []
 	if affect_files:
 		sequance_tags =  get_node_specific_sequencers(node)
@@ -131,10 +154,8 @@ def modify_node(node, cut_data = None, new_dir=None, prefix=None,  replace_data=
 				else:
 					os.rename(file_path_, new_file_path_)        
 	if not errors:
-		print new_path
 		set_file_path(node, new_path)
 	return errors
-
 
 def set_file_path(node, new_path):
 	global node_type_data
@@ -143,4 +164,3 @@ def set_file_path(node, new_path):
 		node.parm(file_name_parm).set(new_path)
 		return True
 	return False
-
